@@ -1,0 +1,539 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: Employee API services
+# during dev, should point to your local machine
+host: localhost:8888
+# basePath prefixes all resource paths 
+basePath: /api/v1
+# Tags information
+tags:
+  - name: Authorization
+    description: User Authentication
+  - name: Users
+    description: All Users informations
+  - name: Notes
+    description: All Notes informations
+# Schema protocol
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  # - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /authenticate:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auths
+    get:
+      tags: ['Authorization']
+      summary: Users login
+      description: Authenticate user with different methods
+      # used as the method name of the controller
+      operationId: authenticate
+      parameters:
+        - name: email
+          in: query
+          description: Email or username 
+          required: true
+          type: string
+        - name: password
+          in: query
+          description: Password of user
+          required: true
+          type: string
+        - name: type
+          in: query
+          description: Authenticate as user
+          required: true
+          type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /authenticate/{action}:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: auths
+    get:
+      tags: ['Authorization']
+      summary: Users login status
+      description: Authenticate user status 
+      # used as the method name of the controller
+      operationId: action
+      parameters:
+        - name: action
+          in: path
+          description: |
+            ```javascript
+              action = me || status || logout
+            ``` 
+          required: true
+          type: string
+        - name: Authorization
+          in: header
+          description: (me, status, logout) => Authorization "Bearer <code>token</code>"
+          required: false
+          type: string
+        - name: status
+          in: query
+          description: (me, status, logout) => Type of user status = status, me, logout
+          required: false
+          type: string
+        - name: password
+          in: query
+          description: (reset) => New password
+          required: false
+          type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /users:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: users
+    get:
+      tags: ['Users']
+      summary: All users information
+      description: Returns list of all users informations.
+      # used as the method name of the controller
+      operationId: getUsers
+      parameters:
+        - name: query
+          in: query
+          description: An encoded query string between () to get users
+          required: false
+          type: string
+        - name: field
+          in: query
+          description: Get specific fields of users
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Get specific numbers of users list
+          required: false
+          type: number
+        - name: sort
+          in: query
+          description: Sort users in <code>asc</code> or <code>desc</code> order
+          required: false
+          type: string
+        - name: skip
+          in: query
+          description: User listing pagination 
+          required: false
+          type: number
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags: ['Users']
+      summary: Add new user record
+      description: Create new user entry in database.
+      # used as the method name of the controller
+      operationId: addUsers
+      parameters:
+        - name: User
+          in: body
+          description: Add new user
+          schema:
+             $ref: '#/definitions/Users'
+          required: true
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /users/{user_id}:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: users
+    get:
+      tags: ['Users']
+      summary: Get individual user
+      description: Get individual user information
+      # used as the method name of the controller
+      operationId: getUserById     
+      parameters:
+        - name: Authorization
+          in: header
+          description: Authorization "Bearer <code>token</code>"
+          required: true
+          type: string
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: access_id
+          in: query
+          description: Access Id for accessing other user
+          required: false
+          type: string
+        - name: access_type
+          in: query
+          description: Access type for accessing other user
+          required: false
+          type: string
+        - name: field
+          in: query
+          description: Get specific fields of users
+          required: false
+          type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put: 
+      tags: ['Users']
+      summary: Update individual user
+      description: Update user information
+      # used as the method name of the controller
+      operationId: updateUserById
+      parameters:
+        - name: Authorization
+          in: header
+          description: Authorization "Bearer <code>token</code>"
+          required: true
+          type: string
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          type: string
+        - name: query
+          in: query
+          description: An encoded query string between () to get users
+          required: false
+          type: string
+        - name: action
+          in: query
+          description: An update action for user 
+          required: false
+          type: string
+        - name: access_id
+          in: query
+          description: Access Id for accessing other user
+          required: false
+          type: string
+        - name: access_type
+          in: query
+          description: Access type for accessing other user
+          required: false
+          type: string
+        - name: User
+          in: body
+          description: Update user body and <code>subId</code> and <code>subtype</code> for address CRUD. <code>subtype</code> = add, update, delete
+          schema:
+             $ref: '#/definitions/Users'
+          required: true
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete: 
+      tags: ['Users']
+      summary: Delete individual user
+      description: Update user information
+      # used as the method name of the controller
+      operationId: deleteUserById
+      parameters:
+        - name: user_id
+          in: path
+          description: User ID
+          required: true
+          type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /notes:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: notes
+    get:
+      tags: ['Notes']
+      summary: All Notes information
+      description: Returns list of all notes informations.
+      # used as the method name of the controller
+      operationId: getNotes
+      parameters:
+        - name: query
+          in: query
+          description: An encoded query string between () to get notes
+          required: false
+          type: string
+        - name: action
+          in: query
+          description: action
+          required: false
+          type: string
+        - name: field
+          in: query
+          description: Get specific fields of notes
+          required: false
+          type: string
+        - name: limit
+          in: query
+          description: Get specific numbers of notes list
+          required: false
+          type: number
+        - name: sort
+          in: query
+          description: Sort notes in <code>asc</code> or <code>desc</code> order
+          required: false
+          type: string
+        - name: skip
+          in: query
+          description: Notes listing pagination 
+          required: false
+          type: number
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags: ['Notes']
+      summary: Add new notes record
+      description: Create new notes entry in database.
+      # used as the method name of the controller
+      operationId: addNotes
+      parameters:
+        - name: Notes
+          in: body
+          description: Add new Notes
+          schema:
+             $ref: '#/definitions/Notes'
+          required: true
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /notes/{notes_id}:
+    # binds a127 app logic to a route
+    x-swagger-router-controller: notes
+    get:
+      tags: ['Notes']
+      summary: Get individual notes
+      description: Get individual notes information
+      # used as the method name of the controller
+      operationId: getNotesById     
+      parameters:
+        - name: Authorization
+          in: header
+          description: Authorization "Bearer <code>token</code>"
+          required: true
+          type: string
+        - name: user_id
+          in: query
+          description: User ID
+          required: true
+          type: string
+        - name: notes_id
+          in: path
+          description: Notes ID
+          required: true
+          type: string
+        - name: field
+          in: query
+          description: Get specific fields of notes
+          required: false
+          type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put: 
+      tags: ['Notes']
+      summary: Update individual notes
+      description: Update notes information
+      # used as the method name of the controller
+      operationId: updateNotesById
+      parameters:
+        - name: Authorization
+          in: header
+          description: Authorization "Bearer <code>token</code>"
+          required: true
+          type: string
+        - name: notes_id
+          in: path
+          description: Notes ID
+          required: true
+          type: string
+        - name: user_id
+          in: query
+          description: User ID
+          required: true
+          type: string
+        - name: query
+          in: query
+          description: An encoded query string between () to get notes
+          required: false
+          type: string
+        - name: action
+          in: query
+          description: An update action for notes
+          required: false
+          type: string
+        - name: Notes
+          in: body
+          description: Update notes body and <code>subId</code> and <code>subtype</code> for address CRUD. <code>subtype</code> = add, update, delete
+          schema:
+             $ref: '#/definitions/Notes'
+          required: true
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete: 
+      tags: ['Notes']
+      summary: Delete individual notes
+      description: Update notes information
+      # used as the method name of the controller
+      operationId: deleteNotesById
+      parameters:
+        - name: Authorization
+          in: header
+          description: Authorization "Bearer <code>token</code>"
+          required: true
+          type: string
+        - name: notes_id
+          in: path
+          description: Notes ID
+          required: true
+          type: string
+        - name: user_id
+          in: query
+          description: User ID
+          required: true
+          type: string
+      responses:
+        "200":
+          description: success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/SuccessResponse"
+        # responses may fall through to errors
+        default:
+          description: error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+# complex objects have schema definitions
+definitions:
+  SuccessResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+      code:
+        type: number
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+      code:
+        type: number
+  Users:
+    type : object
+    properties:
+      first_name : 
+        type: string
+      last_name : 
+        type: string
+      type : 
+        type: string
+      email : 
+        type: string
+      password : 
+        type: string
+  Notes:
+    type : object
+    properties:
+      name: 
+        type: string
+      desc:
+        type: string
