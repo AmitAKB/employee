@@ -34,7 +34,7 @@
     "qrcode": "1.2.2",
     "shortid": "2.2.6",
     "swagger-express-middleware": "^4.0.2",
-    "swagger-express-mw": "0.1.0",
+    "swagger-express-mw": "0.7.0",
     "swagger-tools": "0.10.4",
     "xoauth2": "1.2.0",
     "yamljs": "0.2.4"
